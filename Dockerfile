@@ -1,6 +1,6 @@
 FROM ubuntu:18.04
 
-LABEL MAINTAINER="Robin Genz <mail@robingenz.de>"
+LABEL MAINTAINER="Robin Genz <mail@robingenz.dev>"
 
 ARG JAVA_VERSION=8
 ARG NODEJS_VERSION=12
