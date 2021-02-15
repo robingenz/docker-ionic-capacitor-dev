@@ -13,7 +13,7 @@ Pull from Docker Registry:
 
 Build from GitHub:  
 ```
-docker build -t robingenz/docker-ionic-capacitor-dev github.com/robingenz/docker-ionic-capacitor-dev
+docker build -t robingenz/ionic-capacitor-dev github.com/robingenz/docker-ionic-capacitor-dev
 ```
 
 Available build arguments:  
@@ -31,7 +31,7 @@ Available build arguments:
 
 Run the docker image:  
 ```
-docker run -it robingenz/docker-ionic-capacitor-dev bash
+docker run -it robingenz/ionic-capacitor-dev bash
 ```
 
 ### Use with VSCode Code Remote
@@ -44,7 +44,7 @@ docker run -it robingenz/docker-ionic-capacitor-dev bash
 {
     "name": "docker-ionic-capacitor-dev",
     "context": "..",
-    "image": "github.com/robingenz/docker-ionic-capacitor-dev",
+    "image": "robingenz/ionic-capacitor-dev",
     "settings": {
         "terminal.integrated.shell.linux": "/bin/bash",
         "terminal.integrated.shellArgs.linux": [
