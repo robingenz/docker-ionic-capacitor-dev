@@ -28,14 +28,13 @@ WORKDIR /tmp
 
 SHELL ["/bin/bash", "-l", "-c"] 
 
-RUN apt-get update -q
-
 # General packages
-RUN apt-get install -qy \
+RUN apt-get update -q && apt-get install -qy \
     apt-utils \
     locales \
     gnupg2 \
     build-essential \
+    ca-certificates \
     curl \
     usbutils \
     git \
@@ -60,7 +59,7 @@ RUN apt-get install -qy sudo \
 # Install Ruby
 RUN mkdir ~/.gnupg \
     && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf \
-    && gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB \
+    && gpg --keyserver keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB \
     && curl -sSL https://get.rvm.io | bash \
     && source /usr/local/rvm/scripts/rvm \
     && rvm install ruby-${RUBY_VERSION} \
@@ -71,7 +70,7 @@ ENV PATH=$PATH:${HOME}/.ruby/bin
 # Install Gradle
 ENV GRADLE_HOME=/opt/gradle
 RUN mkdir $GRADLE_HOME \
-    && curl -sL https://downloads.gradle-dn.com/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-${GRADLE_VERSION}-bin.zip \
+    && curl -sL https://downloads.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-${GRADLE_VERSION}-bin.zip \
     && unzip -d $GRADLE_HOME gradle-${GRADLE_VERSION}-bin.zip
 ENV PATH=$PATH:/opt/gradle/gradle-${GRADLE_VERSION}/bin
 
@@ -96,8 +95,8 @@ RUN gem install bundler
 # Install Chrome
 RUN curl -sL https://dl-ssl.google.com/linux/linux_signing_key.pub -o chrome_linux_signing_key.pub \
     && apt-key add chrome_linux_signing_key.pub \
-    && echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update -q && apt-get install -qy google-chrome-stable=${CHROME_VERSION}
+    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+RUN apt-get update && apt-get -y install google-chrome-stable
 
 # Copy adbkey
 RUN mkdir -p -m 0750 /root/.android
