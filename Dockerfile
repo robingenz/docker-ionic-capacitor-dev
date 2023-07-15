@@ -1,15 +1,19 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 
 LABEL MAINTAINER="Robin Genz <mail@robingenz.dev>"
 
-ARG JAVA_VERSION=8
-ARG NODEJS_VERSION=12
-ARG ANDROID_SDK_VERSION=6200805
-ARG ANDROID_BUILD_TOOLS_VERSION=28.0.3
-ARG ANDROID_PLATFORMS_VERSION=29
-ARG GRADLE_VERSION=5.6.4
-ARG RUBY_VERSION=2.7.1
-ARG CHROME_VERSION=81.0.4044.138-1
+ARG JAVA_VERSION=11
+ARG NODEJS_VERSION=16
+# See https://developer.android.com/studio/index.html#command-tools
+ARG ANDROID_SDK_VERSION=9477386
+# See https://androidsdkmanager.azurewebsites.net/Buildtools
+ARG ANDROID_BUILD_TOOLS_VERSION=33.0.0
+# See https://developer.android.com/studio/releases/platforms
+ARG ANDROID_PLATFORMS_VERSION=32
+# See https://gradle.org/releases/
+ARG GRADLE_VERSION=8.0.2
+ARG RUBY_VERSION=3.2.2
+ARG CHROME_VERSION=114.0.5735.99
 
 ARG USERNAME=vscode
 ARG USER_UID=1001
@@ -24,20 +28,19 @@ WORKDIR /tmp
 
 SHELL ["/bin/bash", "-l", "-c"] 
 
-RUN apt-get update -q
-
 # General packages
-RUN apt-get install -qy \
+RUN apt-get update -q && apt-get install -qy \
     apt-utils \
     locales \
     gnupg2 \
     build-essential \
+    ca-certificates \
     curl \
     usbutils \
     git \
     unzip \
     p7zip p7zip-full \
-    python \
+    python3 \
     openjdk-${JAVA_VERSION}-jre \
     openjdk-${JAVA_VERSION}-jdk
 
@@ -56,7 +59,7 @@ RUN apt-get install -qy sudo \
 # Install Ruby
 RUN mkdir ~/.gnupg \
     && echo "disable-ipv6" >> ~/.gnupg/dirmngr.conf \
-    && gpg --keyserver hkp://pool.sks-keyservers.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB \
+    && gpg --keyserver keyserver.ubuntu.com --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB \
     && curl -sSL https://get.rvm.io | bash \
     && source /usr/local/rvm/scripts/rvm \
     && rvm install ruby-${RUBY_VERSION} \
@@ -67,7 +70,7 @@ ENV PATH=$PATH:${HOME}/.ruby/bin
 # Install Gradle
 ENV GRADLE_HOME=/opt/gradle
 RUN mkdir $GRADLE_HOME \
-    && curl -sL https://downloads.gradle-dn.com/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-${GRADLE_VERSION}-bin.zip \
+    && curl -sL https://downloads.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-${GRADLE_VERSION}-bin.zip \
     && unzip -d $GRADLE_HOME gradle-${GRADLE_VERSION}-bin.zip
 ENV PATH=$PATH:/opt/gradle/gradle-${GRADLE_VERSION}/bin
 
@@ -75,10 +78,10 @@ ENV PATH=$PATH:/opt/gradle/gradle-${GRADLE_VERSION}/bin
 ENV ANDROID_HOME=/opt/android-sdk
 RUN curl -sL https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip -o commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip \
     && unzip commandlinetools-linux-${ANDROID_SDK_VERSION}_latest.zip \
-    && mkdir $ANDROID_HOME && mv tools $ANDROID_HOME \
-    && yes | $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses \
-    && $ANDROID_HOME/tools/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "platforms;android-${ANDROID_PLATFORMS_VERSION}"
-ENV PATH=$PATH:${ANDROID_HOME}/tools:${ANDROID_HOME}/platform-tools
+    && mkdir $ANDROID_HOME && mv cmdline-tools $ANDROID_HOME \
+    && yes | $ANDROID_HOME/cmdline-tools/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses \
+    && $ANDROID_HOME/cmdline-tools/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "build-tools;${ANDROID_BUILD_TOOLS_VERSION}" "platforms;android-${ANDROID_PLATFORMS_VERSION}"
+ENV PATH=$PATH:${ANDROID_HOME}/cmdline-tools:${ANDROID_HOME}/platform-tools
 
 # Install NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - \
@@ -92,8 +95,8 @@ RUN gem install bundler
 # Install Chrome
 RUN curl -sL https://dl-ssl.google.com/linux/linux_signing_key.pub -o chrome_linux_signing_key.pub \
     && apt-key add chrome_linux_signing_key.pub \
-    && echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list \
-    && apt-get update -q && apt-get install -qy google-chrome-stable=${CHROME_VERSION}
+    && echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list
+RUN apt-get update && apt-get -y install google-chrome-stable
 
 # Copy adbkey
 RUN mkdir -p -m 0750 /root/.android
