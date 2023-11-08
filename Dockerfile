@@ -70,7 +70,7 @@ ENV PATH=$PATH:${HOME}/.ruby/bin
 # Install Gradle
 ENV GRADLE_HOME=/opt/gradle
 RUN mkdir $GRADLE_HOME \
-    && curl -sL https://downloads.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-${GRADLE_VERSION}-bin.zip \
+    && curl -sL https://services.gradle.org/distributions/gradle-${GRADLE_VERSION}-bin.zip -o gradle-${GRADLE_VERSION}-bin.zip \
     && unzip -d $GRADLE_HOME gradle-${GRADLE_VERSION}-bin.zip
 ENV PATH=$PATH:/opt/gradle/gradle-${GRADLE_VERSION}/bin
 
