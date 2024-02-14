@@ -2,8 +2,8 @@ FROM ubuntu:22.04
 
 LABEL MAINTAINER="Robin Genz <mail@robingenz.dev>"
 
-ARG JAVA_VERSION=11
-ARG NODEJS_VERSION=16
+ARG JAVA_VERSION=17
+ARG NODEJS_VERSION=20
 # See https://developer.android.com/studio/index.html#command-tools
 ARG ANDROID_SDK_VERSION=9477386
 # See https://androidsdkmanager.azurewebsites.net/Buildtools
@@ -12,6 +12,10 @@ ARG ANDROID_BUILD_TOOLS_VERSION=33.0.0
 ARG ANDROID_PLATFORMS_VERSION=32
 # See https://gradle.org/releases/
 ARG GRADLE_VERSION=8.0.2
+# See https://www.npmjs.com/package/@ionic/cli
+ARG IONIC_VERSION=7.2.0
+# See https://www.npmjs.com/package/@capacitor/cli
+ARG CAPACITOR_VERSION=5.7.0
 ARG RUBY_VERSION=3.2.2
 ARG CHROME_VERSION=114.0.5735.99
 
@@ -88,6 +92,10 @@ RUN curl -sL https://deb.nodesource.com/setup_${NODEJS_VERSION}.x | bash - \
     && apt-get update -q && apt-get install -qy nodejs
 ENV NPM_CONFIG_PREFIX=${HOME}/.npm-global
 ENV PATH=$PATH:${HOME}/.npm-global/bin
+
+# Install Ionic CLI and Capacitor CLI
+RUN npm install -g @ionic/cli@${IONIC_VERSION} \
+    && npm install -g @capacitor/cli@${CAPACITOR_VERSION}
 
 # Install Bundler
 RUN gem install bundler
